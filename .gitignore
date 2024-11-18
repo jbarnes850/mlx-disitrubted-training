@@ -82,4 +82,25 @@ temp/
 # Distributed training specific
 *.mpiout
 *.mpierr
-*.lock 
+*.lock
+
+# MLX specific
+*.safetensors
+*.bin
+*.onnx
+*.pt
+*.pth
+
+# Large files
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+
+# Logs and data
+logs/
+data/
+checkpoints/
+runs/
+wandb/ 
