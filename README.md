@@ -10,50 +10,45 @@ A high-performance distributed training framework for MLX that enables efficient
 
 ## Introduction to Distributed Training with MLX
 
-MLX enables efficient distributed training across multiple Apple Silicon devices by leveraging the [MLX distributed communication framework](https://ml-explore.github.io/mlx/build/html/usage/distributed.html). This implementation focuses on data-parallel training, where each device holds a complete model copy but processes different data batches.
+This project explores the potential of distributed training on Apple Silicon, specifically targeting the development of large language models. By leveraging [MLX's distributed communication framework](https://ml-explore.github.io/mlx/build/html/usage/distributed.html), we're pushing the boundaries of what's possible with consumer hardware.
 
-Distributed training is a crucial advancement in AI that democratizes access to large-scale model development. By allowing multiple devices to work together, we can:
+The primary goal is ambitious yet practical: train a 1B parameter model using a network of Mac devices that outperforms state-of-the-art results (such as llama 3.2). Traditional approaches to training models of this scale typically require expensive cloud resources or specialized hardware. This implementation demonstrates that with efficient distributed algorithms and Apple's unified architecture, we can achieve comparable results using devices many developers already own.
 
-- Train larger models that wouldn't fit on a single device
-- Dramatically reduce training time through parallel processing
-- Enable collaborative research across distributed teams
-- Lower the barrier to entry for AI research and development
-
-This project aims to make distributed training accessible to researchers, educators, and developers using consumer Apple hardware. While cloud providers offer powerful distributed training capabilities, having these tools available on local hardware opens new possibilities for:
-
-- Academic research without expensive cloud costs
-- Privacy-preserving AI development on sensitive data
-- Community-driven model development
-
-Our implementation leverages the power of Apple Silicon to deliver efficient distributed training that was previously only possible with specialized hardware. We believe this can help accelerate AI innovation while keeping it open, accessible, and focused on public benefit.
+This framework is designed for ML engineers and researchers interested in:
+- Implementing and optimizing distributed training systems
+- Exploring novel approaches to model parallelism and gradient synchronization
+- Understanding the practical aspects of training large language models
+- Contributing to the advancement of decentralized ML infrastructure
 
 ### Why MLX for Distributed Training?
 
-1. **Native Apple Silicon Support**:
-   - MLX is built specifically for Apple's Metal architecture
-   - Direct access to Metal Performance Shaders (MPS)
-   - Optimized for the Neural Engine and unified memory
+After extensive experimentation with various frameworks, MLX emerged as the optimal choice for distributed training on Apple Silicon for several compelling reasons:
 
-2. **Efficient Communication**:
-   - Uses MPI for high-performance inter-device communication
-   - Supports gradient synchronization through all-reduce operations
-   - Optimized for Apple's networking stack
+1. **Native Silicon Architecture Integration**
+   - Direct compilation to Metal, maximizing M-series chip performance
+   - Seamless utilization of the Neural Engine and unified memory
+   - Optimized memory bandwidth and computational throughput
+   - Performance that consistently outpaces traditional frameworks on Apple hardware
 
-3. **Memory Efficiency**:
-   - Unified memory architecture eliminates CPU-GPU transfers
-   - Dynamic batch sizing based on available memory
-   - Gradient checkpointing for large models
-   - Real-time performance monitoring
-   - HuggingFace datasets integration
-   - Inference server deployment
+2. **Advanced Communication Architecture**
+   - High-efficiency MPI-based inter-device communication
+   - Zero-copy gradient synchronization through optimized all-reduce operations
+   - Network stack specifically tuned for Apple's hardware ecosystem
+   - Minimal overhead in multi-device coordination
 
-### Key Features
+3. **Sophisticated Memory Management**
+   - Leverages unified memory architecture for optimal resource utilization
+   - Implements dynamic batch size adjustment based on device capabilities
+   - Advanced gradient checkpointing for memory-constrained scenarios
+   - Comprehensive monitoring and profiling capabilities
 
-- Distributed training optimized for Apple Silicon
-- Streaming dataset support with HuggingFace integration
-- Real-time performance monitoring dashboard
-- Automatic memory optimization
-- Production-ready inference server
+Our research and development focus on several key areas:
+- Scaling transformer architectures to 1B-3B parameters across distributed Mac systems
+- Implementing novel data streaming and caching strategies
+- Exploring hybrid parallelism techniques (data, model, and pipeline)
+- Developing robust distributed training protocols
+
+This project serves as both a practical implementation and a research platform, enabling the ML community to explore distributed training techniques without the traditional barriers to entry. We welcome contributions from engineers and researchers interested in advancing the field of distributed ML training.
 
 ## Quick Start
 
