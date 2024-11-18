@@ -2,7 +2,7 @@
 
 A high-performance distributed training framework for MLX that enables efficient model training across multiple Apple Silicon devices.
 
-![MLX Version](https://img.shields.io/badge/MLX-%3E%3D0.0.8-blue)
+![MLX Version](https://img.shields.io/badge/MLX-%3E%3D0.20.0-blue)
 ![Python](https://img.shields.io/badge/Python-%3E%3D3.12-blue)
 ![macOS](https://img.shields.io/badge/macOS-Sonoma%2014.0%2B-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-green)

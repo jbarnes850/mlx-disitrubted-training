@@ -7,7 +7,7 @@ numpy>=1.24.0
 torch>=2.1.0  # For data preprocessing only
 
 # Distributed Training
-mpi4py-mpich>=3.1.4
+mpi4py>=3.1.4
 paramiko>=3.3.1
 
 # Monitoring & Visualization

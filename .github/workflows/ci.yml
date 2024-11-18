@@ -18,11 +18,19 @@ jobs:
       run: |
         brew install mpich
         
-    - name: Install Python dependencies
+    - name: Install base Python dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install mpi4py
+        python -m pip install --upgrade pip wheel setuptools
+        pip install mpi4py  # Install mpi4py first
+        
+    - name: Install project dependencies
+      run: |
         pip install -e ".[dev]"
+        
+    - name: Verify system setup
+      run: |
+        python scripts/verify_setup.py
+        python scripts/test_network.py --local-only
         
     - name: Run tests
       run: |
