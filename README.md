@@ -1,6 +1,6 @@
 # MLX Distributed Training
 
-A high-performance distributed training framework for MLX that enables efficient model training across multiple Apple Silicon devices.
+A high-performance distributed training framework for MLX that enables efficient AI model training across multiple Apple Silicon devices.
 
 ![MLX Version](https://img.shields.io/badge/MLX-%3E%3D0.20.0-blue)
 ![Python](https://img.shields.io/badge/Python-%3E%3D3.12-blue)
