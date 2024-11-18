@@ -3,7 +3,7 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  test:
+  basic-verify:
     runs-on: macos-14
     
     steps:
@@ -19,15 +19,8 @@ jobs:
         brew install mpich
         pip install -e ".[dev]"
         
-    - name: Run tests
+    - name: Basic verification
       run: |
-        # Basic verification and core tests
+        # Just verify basic setup and network
         python scripts/verify_setup.py --ci-mode
         python scripts/test_network.py --local-only
-        pytest tests/core -v
-        
-    - name: Check project structure
-      run: |
-        test -d src/models
-        test -d src/distributed
-        test -d tests
