@@ -1,0 +1,34 @@
+{
+    "model": {
+        "num_layers": 22,
+        "vocab_size": 32000,
+        "dims": 2048,
+        "mlp_dims": 5504,
+        "num_heads": 16,
+        "max_seq_length": 8192,
+        "rope_base": 1000000,
+        "sliding_window": 512,
+        "use_flash_attn": true,
+        "use_gqa": true,
+        "kv_heads": 4,
+        "intermediate_size": 5504
+    },
+    "architecture_notes": {
+        "attention": "Multi-head attention with RoPE",
+        "normalization": "RMSNorm for better training stability",
+        "activation": "SwiGLU in feed-forward networks",
+        "position_encoding": "Rotary Position Embeddings (RoPE)",
+        "parameters": "~1B parameters total",
+        "layer_details": {
+            "attention_dims": "dims / num_heads per head",
+            "mlp_ratio": "2.7x hidden dimension",
+            "head_dim": 128,
+            "layer_structure": [
+                "Self-attention with RoPE",
+                "RMSNorm",
+                "SwiGLU FFN",
+                "Residual connections"
+            ]
+        }
+    }
+} 

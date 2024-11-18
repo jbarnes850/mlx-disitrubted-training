@@ -1,0 +1,13 @@
+{
+    "training": {
+        "batch_size": 16,
+        "gradient_accumulation_steps": 4,
+        "max_memory_gb": 32,
+        "mixed_precision": true
+    },
+    "model": {
+        "num_layers": 12,
+        "dims": 768,
+        "num_heads": 12
+    }
+} 

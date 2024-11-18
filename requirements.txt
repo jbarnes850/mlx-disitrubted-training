@@ -1,0 +1,31 @@
+# Core ML Dependencies
+mlx>=0.0.8
+transformers>=4.36.0
+datasets>=2.15.0
+safetensors>=0.4.0
+numpy>=1.24.0
+torch>=2.1.0  # For data preprocessing only
+
+# Distributed Training
+mpi4py-mpich>=3.1.4
+paramiko>=3.3.1
+
+# Monitoring & Visualization
+fastapi>=0.104.0
+uvicorn>=0.24.0
+plotly>=5.18.0
+dash>=2.14.0
+psutil>=5.9.0
+
+# Testing & Development
+pytest>=7.4.3
+pytest-asyncio>=0.21.1
+pytest-cov>=4.1.0
+black>=23.11.0
+isort>=5.12.0
+
+# Utilities
+tqdm>=4.66.1
+pyyaml>=6.0.1
+huggingface-hub>=0.19.4
+iperf3>=0.1.11

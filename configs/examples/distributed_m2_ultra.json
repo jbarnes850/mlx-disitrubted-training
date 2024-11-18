@@ -1,0 +1,12 @@
+{
+    "training": {
+        "batch_size": {
+            "primary": 32,
+            "secondary": 16
+        },
+        "max_memory_gb": {
+            "primary": 160,
+            "secondary": 96
+        }
+    }
+} 
