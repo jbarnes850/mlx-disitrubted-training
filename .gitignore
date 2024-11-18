@@ -1,0 +1,85 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.env
+.venv/
+env/
+venv/
+ENV/
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# MLX Training
+models/*
+!models/.gitkeep
+checkpoints/*
+!checkpoints/.gitkeep
+logs/*
+!logs/.gitkeep
+data/*
+!data/.gitkeep
+
+# Training artifacts
+*.safetensors
+*.bin
+*.pt
+*.ckpt
+eval_results/
+benchmark_results/
+profile_results.json
+
+# Development
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+# Configuration
+configs/*
+!configs/examples/
+!configs/distributed_config.json
+!configs/model_config.json
+
+# Network
+hostfile
+*.pem
+*.key
+id_*
+known_hosts
+
+# Monitoring
+*.log
+dashboard/*.json
+metrics/*.csv
+*.prof
+*.trace
+
+# Documentation
+docs/_build/
+site/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+
+# Environment
+.env.local
+.env.*.local
+.python-version
+
+# Distributed training specific
+*.mpiout
+*.mpierr
+*.lock 
