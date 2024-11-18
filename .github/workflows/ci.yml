@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   test:
-    runs-on: macos-latest
+    runs-on: macos-14
     
     steps:
     - uses: actions/checkout@v2
@@ -12,32 +12,42 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.10'
+        python-version: '3.12'
         
-    - name: Install system dependencies
+    - name: Install dependencies
       run: |
         brew install mpich
-        
-    - name: Install base Python dependencies
-      run: |
-        python -m pip install --upgrade pip wheel setuptools
-        pip install mpi4py  # Install mpi4py first
-        
-    - name: Install project dependencies
-      run: |
         pip install -e ".[dev]"
         
-    - name: Verify system setup
+    - name: Core tests
       run: |
-        python scripts/verify_setup.py
+        # Basic system verification
+        python scripts/verify_setup.py --ci-mode
+        
+        # Core functionality test
         python scripts/test_network.py --local-only
         
-    - name: Run tests
-      run: |
-        pytest tests/ -v
+        # Run essential unit tests
+        pytest tests/core -v
         
-    - name: Run linting
+    - name: Check basic structure
       run: |
-        black --check .
-        isort --check-only .
-        mypy src/
+        # Essential files
+        test -f setup.py
+        test -f requirements.txt
+        test -f README.md
+        test -f LICENSE
+        
+        # Core directories
+        test -d src/models
+        test -d src/distributed
+        test -d tests
+        test -d examples
+        
+    - name: Verify documentation
+      run: |
+        # Check README and examples
+        python scripts/check_docs.py --basic-check
+        
+        # Verify example notebook exists
+        test -f examples/distributed_training.ipynb

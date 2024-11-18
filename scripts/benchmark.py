@@ -2,6 +2,7 @@ import mlx.core as mx
 import time
 import json
 import logging
+import os
 from pathlib import Path
 from src.models.unified_model import UnifiedModel, ModelConfig
 from src.monitoring.dashboard import PerformanceDashboard
@@ -14,23 +15,47 @@ import numpy as np
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+def is_ci_environment() -> bool:
+    """Check if we're running in a CI environment"""
+    return os.environ.get('CI', 'false').lower() == 'true'
+
 class ModelBenchmark:
     """Comprehensive benchmark suite for MLX models"""
-    def __init__(self, config_path: str = "configs/distributed_config.json"):
+    def __init__(self, config_path: str = "configs/distributed_config.json", ci_mode: bool = False):
         self.config = self._load_config(config_path)
-        self.dashboard = PerformanceDashboard(self.config["monitoring"])
+        self.ci_mode = ci_mode
+        self.dashboard = None if ci_mode else PerformanceDashboard(self.config["monitoring"])
         self.tokenizer = AutoTokenizer.from_pretrained("gpt2")
+        
+        # Adjust config for CI environment
+        if ci_mode:
+            self._adjust_config_for_ci()
+            
+    def _adjust_config_for_ci(self):
+        """Adjust model and training parameters for CI testing"""
+        self.config["model"].update({
+            "num_layers": 2,
+            "dims": 128,
+            "num_heads": 2
+        })
+        self.config["training"].update({
+            "batch_size": 4,
+            "max_steps": 5,
+            "gradient_accumulation_steps": 2
+        })
         
     def _load_config(self, config_path: str) -> dict:
         with open(config_path) as f:
             return json.load(f)
             
-    async def benchmark_mmlu(self, split: str = "test") -> Dict[str, float]:
+    async def benchmark_mmlu(self, split: str = "test", num_examples: int = None) -> Dict[str, float]:
         """Benchmark on MMLU dataset"""
         logger.info("Running MMLU benchmark...")
         
         # Load MMLU dataset
         dataset = load_dataset("cais/mmlu", split=split)
+        if num_examples and num_examples > 0:
+            dataset = dataset.select(range(min(num_examples, len(dataset))))
         
         results = {
             "humanities": [],
@@ -49,26 +74,34 @@ class ModelBenchmark:
             prompt = self._format_mmlu_prompt(example)
             
             # Get model prediction
-            inputs = self.tokenizer(prompt, return_tensors="np")
-            output = model(inputs["input_ids"])
-            pred = output.argmax(-1).item()
+            start_time = time.time()
+            prediction = await model.generate(prompt, max_tokens=1)
+            inference_time = time.time() - start_time
             
-            # Record accuracy
-            correct = pred == example["answer"]
-            results[category].append(correct)
+            # Record metrics
+            correct = self._check_mmlu_answer(prediction, example["answer"])
+            results[category].append({
+                "correct": correct,
+                "inference_time": inference_time
+            })
             
-        # Compute averages
-        return {
-            category: np.mean(scores) * 100
-            for category, scores in results.items()
-        }
+            if not self.ci_mode and self.dashboard:
+                self.dashboard.update_metrics({
+                    "accuracy": correct,
+                    "inference_time": inference_time,
+                    "subject": subject
+                })
         
-    async def benchmark_mmlu_pro(self, split: str = "test") -> Dict[str, float]:
+        return self._aggregate_results(results)
+        
+    async def benchmark_mmlu_pro(self, split: str = "test", num_examples: int = None) -> Dict[str, float]:
         """Benchmark on MMLU-Pro dataset"""
         logger.info("Running MMLU-Pro benchmark...")
         
         # Load MMLU-Pro dataset
         dataset = load_dataset("TIGER-Lab/MMLU-Pro", split=split)
+        if num_examples and num_examples > 0:
+            dataset = dataset.select(range(min(num_examples, len(dataset))))
         
         results = {
             "biology": [],
@@ -96,19 +129,25 @@ class ModelBenchmark:
             prompt = self._format_mmlu_pro_prompt(example)
             
             # Get model prediction
-            inputs = self.tokenizer(prompt, return_tensors="np")
-            output = model(inputs["input_ids"])
-            pred = output.argmax(-1).item()
+            start_time = time.time()
+            prediction = await model.generate(prompt, max_tokens=1)
+            inference_time = time.time() - start_time
             
-            # Record accuracy
-            correct = pred == example["answer"]
-            results[subject].append(correct)
+            # Record metrics
+            correct = self._check_mmlu_answer(prediction, example["answer"])
+            results[subject].append({
+                "correct": correct,
+                "inference_time": inference_time
+            })
             
-        # Compute averages
-        return {
-            subject: np.mean(scores) * 100
-            for subject, scores in results.items()
-        }
+            if not self.ci_mode and self.dashboard:
+                self.dashboard.update_metrics({
+                    "accuracy": correct,
+                    "inference_time": inference_time,
+                    "subject": subject
+                })
+        
+        return self._aggregate_results(results)
         
     def benchmark_training(self, num_steps: int = 100) -> Dict[str, float]:
         """Benchmark training performance"""
@@ -209,6 +248,26 @@ class ModelBenchmark:
                 return category
         return "other"
         
+    def _check_mmlu_answer(self, prediction: str, answer: str) -> bool:
+        """Check if prediction matches answer"""
+        return prediction == answer
+        
+    def _aggregate_results(self, results: Dict[str, List[Dict]]) -> Dict[str, float]:
+        """Aggregate results"""
+        aggregated_results = {}
+        
+        for category, metrics in results.items():
+            correct = sum(1 for metric in metrics if metric["correct"])
+            accuracy = correct / len(metrics)
+            avg_inference_time = sum(metric["inference_time"] for metric in metrics) / len(metrics)
+            
+            aggregated_results[category] = {
+                "accuracy": accuracy,
+                "avg_inference_time": avg_inference_time
+            }
+        
+        return aggregated_results
+        
     async def run_all_benchmarks(self) -> Dict[str, Dict[str, float]]:
         """Run all benchmarks"""
         results = {
@@ -288,24 +347,27 @@ async def main():
     """Main benchmark function"""
     parser = argparse.ArgumentParser(description="MLX Model Benchmark")
     parser.add_argument("--config", default="configs/distributed_config.json")
+    parser.add_argument("--ci-mode", action="store_true", help="Run in CI mode")
+    parser.add_argument("--num-examples", type=int, help="Number of examples to run for MMLU benchmarks")
     args = parser.parse_args()
     
-    benchmark = ModelBenchmark(args.config)
+    ci_mode = args.ci_mode or is_ci_environment()
+    benchmark = ModelBenchmark(args.config, ci_mode)
     results = await benchmark.run_all_benchmarks()
     
     logger.info("\nBenchmark Results:")
     
     # MMLU Results
     logger.info("\nMMLU Results:")
-    for category, score in results["mmlu"].items():
-        logger.info(f"  {category}: {score:.2f}%")
-    logger.info(f"  Average: {np.mean(list(results['mmlu'].values())):.2f}%")
+    for category, metrics in results["mmlu"].items():
+        logger.info(f"  {category}: {metrics['accuracy']:.2f}%")
+    logger.info(f"  Average: {np.mean([metrics['accuracy'] for metrics in results['mmlu'].values()]):.2f}%")
     
     # MMLU-Pro Results
     logger.info("\nMMLU-Pro Results:")
-    for subject, score in results["mmlu_pro"].items():
-        logger.info(f"  {subject}: {score:.2f}%")
-    logger.info(f"  Average: {np.mean(list(results['mmlu_pro'].values())):.2f}%")
+    for subject, metrics in results["mmlu_pro"].items():
+        logger.info(f"  {subject}: {metrics['accuracy']:.2f}%")
+    logger.info(f"  Average: {np.mean([metrics['accuracy'] for metrics in results['mmlu_pro'].values()]):.2f}%")
     
     # Performance Results
     logger.info("\nTraining Performance:")

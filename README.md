@@ -50,11 +50,24 @@ Our research and development focus on several key areas:
 
 This project serves as both a practical implementation and a research platform, enabling the ML community to explore distributed training techniques without the traditional barriers to entry. We welcome contributions from engineers and researchers interested in advancing the field of distributed ML training.
 
-## Quick Start
+## Installation
 
-1. **Environment Setup**:
+### System Requirements
+
+- macOS Sonoma 14.0+ (Apple Silicon)
+- Python 3.12+
+- Xcode Command Line Tools
+- MLX 0.20.0+
+- High-speed network connection (10Gbps recommended)
+- SSH access configured between devices
+
+### Setup and Installation
 
 ```bash
+# Install system dependencies
+xcode-select --install
+brew install mpich
+
 # Clone repository
 git clone https://github.com/jbarnes850/mlx_distributed
 cd mlx_distributed
@@ -65,19 +78,13 @@ source .venv/bin/activate
 
 # Install dependencies
 pip install -e ".[dev]"
-```
 
-2. **Verify Setup**:
-
-```bash
-# Run verification script
-./scripts/verify_setup.sh
-
-# Test network connectivity
+# Verify setup
+python scripts/verify_setup.py
 python scripts/test_network.py
 ```
 
-3. **Start Training**:
+### Start Training
 
 ```bash
 # On primary device (e.g., Mac Studio M2 Ultra)
@@ -87,7 +94,7 @@ python scripts/test_network.py
 ./scripts/start_training.sh --role secondary
 ```
 
-4. **Monitor Progress**:
+### Monitor Progress
 
 ```bash
 # Open dashboard
@@ -142,6 +149,40 @@ Our distributed training implementation follows MLX's recommended practices:
 For more details on MLX's distributed capabilities, see:
 - [Distributed Communication Guide](https://ml-explore.github.io/mlx/build/html/usage/distributed.html)
 - [MLX Examples Repository](https://github.com/ml-explore/mlx-examples)
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Network Communication Errors**
+   - Verify SSH keys are properly configured between devices
+   - Check network bandwidth using `scripts/test_network.py`
+   - Ensure all devices are on the same subnet
+   - Try reducing `batch_size` if experiencing timeouts
+
+2. **Memory Issues**
+   - Enable gradient checkpointing in config
+   - Reduce model size or batch size
+   - Monitor memory usage with dashboard
+   - Use streaming dataset loading
+
+3. **Performance Problems**
+   - Verify Metal is properly configured
+   - Check CPU/GPU utilization
+   - Monitor network bandwidth
+   - Adjust number of worker processes
+
+4. **Installation Issues**
+   - Update Xcode Command Line Tools
+   - Verify Python version compatibility
+   - Check MLX installation
+   - Review system requirements
+
+For more detailed troubleshooting:
+- Check logs in `logs/training.log`
+- Use monitoring dashboard
+- Review [Performance Tuning Guide](docs/performance_tuning.md)
+- Join our [Discord Community](https://discord.gg/mlx-distributed)
 
 ## Contributing
 

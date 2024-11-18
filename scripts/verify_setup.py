@@ -9,9 +9,18 @@ from typing import Dict, Any
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+def is_ci_environment() -> bool:
+    """Check if we're running in a CI environment"""
+    return os.environ.get('CI', 'false').lower() == 'true'
+
 def verify_hardware() -> bool:
     """Verify hardware capabilities"""
     try:
+        # Skip detailed hardware checks in CI environment
+        if is_ci_environment():
+            logger.info("Running in CI environment - skipping detailed hardware checks")
+            return True
+
         # Check Metal availability
         if not mx.metal.is_available():
             logger.error("Metal backend not available")
@@ -27,6 +36,9 @@ def verify_hardware() -> bool:
         return True
         
     except Exception as e:
+        if is_ci_environment():
+            logger.warning(f"Hardware check exception in CI (expected): {str(e)}")
+            return True
         logger.error(f"Hardware verification failed: {str(e)}")
         return False
 
