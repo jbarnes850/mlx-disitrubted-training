@@ -130,8 +130,8 @@ tail -f logs/training.log
 ## Documentation
 
 - [MLX Distributed Documentation](https://ml-explore.github.io/mlx/build/html/usage/distributed.html)
+- [Performance Tuning Guide](docs/performance_tuning.md)
 - [Setup Guide](docs/setup_guide.md)
-- [Performance Tuning](docs/performance_tuning.md)
 - [API Reference](docs/api.md)
 - [Best Practices](docs/best_practices.md)
 
@@ -153,9 +153,10 @@ Our distributed training implementation follows MLX's recommended practices:
 
 3. **Performance Optimization**:
    - Mixed precision training
-   - Gradient compression for efficient communication
-   - Multiple TCP links for improved bandwidth
-   - Sliding window attention for long sequences
+   - Separate compute/memory streams
+   - Flash Attention implementation
+   - Grouped Query Attention (GQA)
+   - Optimized memory layout
 
 4. **Monitoring and Recovery**:
    - Real-time performance dashboard
@@ -190,7 +191,6 @@ For more details on MLX's distributed capabilities, see:
    - Adjust number of worker processes
 
 4. **Installation Issues**
-   - Update Xcode Command Line Tools
    - Verify Python version compatibility
    - Check MLX installation
    - Review system requirements
@@ -200,6 +200,15 @@ For more detailed troubleshooting:
 - Use monitoring dashboard
 - Review [Performance Tuning Guide](docs/performance_tuning.md)
 - Join our [Discord Community](https://discord.gg/mlx-distributed)
+
+## Performance Tuning
+
+For detailed information about our hardware configuration, training process, and performance optimizations, please see our [Performance Tuning Guide](docs/performance_tuning.md). This guide includes:
+- Current hardware specifications and configurations
+- Training time estimates and comparisons
+- Detailed performance optimization strategies
+- Memory management techniques
+- Monitoring and stability measures
 
 ## Contributing
 
@@ -212,8 +221,3 @@ For more detailed troubleshooting:
 ## License
 
 MIT License
-
-## Acknowledgments
-
-- MLX Team at Apple
-- MLX Community Contributors
