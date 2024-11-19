@@ -7,20 +7,20 @@ jobs:
     runs-on: macos-14
     
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     
-    - name: Set up Python
-      uses: actions/setup-python@v2
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
       with:
-        python-version: '3.12'
+        python-version: "3.11"
         
     - name: Install dependencies
       run: |
         brew install mpich
-        pip install -e ".[dev]"
+        python -m pip install --upgrade pip
+        python -m pip install -e ".[dev]"
         
     - name: Basic verification
       run: |
-        # Just verify basic setup and network
         python scripts/verify_setup.py --ci-mode
         python scripts/test_network.py --local-only
