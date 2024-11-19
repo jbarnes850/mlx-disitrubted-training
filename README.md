@@ -1,11 +1,12 @@
-# MLX Distributed Training
+# MLX Distributed Training (Beta)
 
-A high-performance distributed training framework for MLX that enables efficient AI model training across multiple Apple Silicon devices.
+A privacy-first distributed training framework built on MLX for Apple Silicon, enabling secure and efficient AI model training across multiple devices while preserving data privacy.
 
 ![MLX Version](https://img.shields.io/badge/MLX-%3E%3D0.20.0-blue)
-![Python](https://img.shields.io/badge/Python-%3E%3D3.12-blue)
+![Python](https://img.shields.io/badge/Python-%3E%3D3.11-blue)
 ![macOS](https://img.shields.io/badge/macOS-Sonoma%2014.0%2B-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-green)
+![Status](https://img.shields.io/badge/Status-Beta-yellow)
 ![Tests](https://img.shields.io/badge/Tests-Passing-success)
 
 ## What We're Building
@@ -19,11 +20,18 @@ We're training a decoder-only transformer model from scratch, optimized for Appl
   - 8192 max sequence length
   - Training optimizations: Flash Attention, Grouped Query Attention (GQA), RoPE embeddings, SwiGLU activations
 
-- **Goal**: Train a competitive 1B parameter model that can match or exceed Llama 3.2's performance using distributed consumer hardware instead of traditional GPU clusters. Overall, we're aming to push the boundaries of what's possible with Apple Silicon and see how preformance scales with increasing model size on consumer hardware.
+- **Goal**: Train a competitive 1B parameter model that can match or exceed Llama 3.2's performance using distributed consumer hardware instead of traditional GPU clusters. Overall, we're aiming to push the boundaries of what's possible with Apple Silicon and see how performance scales with increasing model size on consumer hardware.
 
 ## System Architecture
 
 [![](https://mermaid.ink/img/pako:eNqlVmtv0zAU_SuWkfiUodlpWRchJGjHQ2rWinYCke6DGzutIbEjx2EbY_-dm1eTRl2LRKSqiXPO9fU959p5xKHmAnt4Y1i6Rcv3K4XgyvJ1NTA3MmHmAV0DqnpVXMtxsDRMKqk2aKy14VIxq80tOjt7i_58VtJKFsvfIvuDJksSTGRmjVznVvCSJsxtGwsAFe0mK_C-TwJfJBrm9Jlim2PY6zEJroW90-YnpJEkuZJhmcezjOWCtJkvwq3geXxshvmEBHNhIm0SpkKBJizbrjUz_HnK-IoEY62sVLnOM3T1i8V5J6mWt6vxhFmG5jIVMZQGkRZRRod6lICmGtVcC2sES4r6Tuv3U8343lJK9rTO7YMQvFKjBQjF24cDefmgeVwUNtVKKJv1UyuUmn6rYHVaH7S5g-qgOcv6sxXXjASz1MoErNEs5CblzJbCH8qsvOlZciFCrXhjyqwrBD1ktX130WPuovvuoqfdRffdRY-766T4tC8-PSE-PSo-7YlP_0P8XmpFIU-I32PM6BHx6XHxodPRm5Ly0TAuISG0eFBhKVIf8VXIzdai9wZqErLMdkA9J_kadiptCrVeoqJnjY7bPKD3qyx9AZYKiyU13X9yT4BNoOLW7S-16tCf93Zb7zYWl0aERQQ0_dKO-n7fyHWy5RMk-3F-E8APVahObtfjw7au-I1ERQNcLXdIsHUUybATZrk45PUqyDv-I88shPg0Dz49pMKkzLBEWGGybvf4x80N70pAJuztXsnCGBw2ERFK69MpknHsvYguIwe6X_8U3gvXdev7szvJ7daj6X2HmO32kIq6Xv8zNWwkqqk84v9KTVq_1Rmf5NZsOHEd2E0dOB0dcLoD55gD_nTAZw6cEA7s8w78zUhTkoYHXQgkCiQKJApg-E1hjDoz2pahgfs-IAEIuHahu1iNf4upO4vBDk4ENIPk8B3xWCi1wnYrErHCHtxyEbE8tiu8Uk8AZbnVRe9iz5pcONjofLPFXsTiDJ7yckeYSAb9kOxGU6a-a500FHjE3iO-x94ZIa_OL1w6uiCEjF7T4YA4-KEYH8H4-eXr0eXFcDAauqPhk4N_lzHIK-IS9-J8OBgMXHd46Y4cLHixFr_6FCq_iJ7-Aiso0mw)](https://mermaid.live/edit#pako:eNqlVmtv0zAU_SuWkfiUodlpWRchJGjHQ2rWinYCke6DGzutIbEjx2EbY_-dm1eTRl2LRKSqiXPO9fU959p5xKHmAnt4Y1i6Rcv3K4XgyvJ1NTA3MmHmAV0DqnpVXMtxsDRMKqk2aKy14VIxq80tOjt7i_58VtJKFsvfIvuDJksSTGRmjVznVvCSJsxtGwsAFe0mK_C-TwJfJBrm9Jlim2PY6zEJroW90-YnpJEkuZJhmcezjOWCtJkvwq3geXxshvmEBHNhIm0SpkKBJizbrjUz_HnK-IoEY62sVLnOM3T1i8V5J6mWt6vxhFmG5jIVMZQGkRZRRod6lICmGtVcC2sES4r6Tuv3U8343lJK9rTO7YMQvFKjBQjF24cDefmgeVwUNtVKKJv1UyuUmn6rYHVaH7S5g-qgOcv6sxXXjASz1MoErNEs5CblzJbCH8qsvOlZciFCrXhjyqwrBD1ktX130WPuovvuoqfdRffdRY-766T4tC8-PSE-PSo-7YlP_0P8XmpFIU-I32PM6BHx6XHxodPRm5Ly0TAuISG0eFBhKVIf8VXIzdai9wZqErLMdkA9J_kadiptCrVeoqJnjY7bPKD3qyx9AZYKiyU13X9yT4BNoOLW7S-16tCf93Zb7zYWl0aERQQ0_dKO-n7fyHWy5RMk-3F-E8APVahObtfjw7au-I1ERQNcLXdIsHUUybATZrk45PUqyDv-I88shPg0Dz49pMKkzLBEWGGybvf4x80N70pAJuztXsnCGBw2ERFK69MpknHsvYguIwe6X_8U3gvXdev7szvJ7daj6X2HmO32kIq6Xv8zNWwkqqk84v9KTVq_1Rmf5NZsOHEd2E0dOB0dcLoD55gD_nTAZw6cEA7s8w78zUhTkoYHXQgkCiQKJApg-E1hjDoz2pahgfs-IAEIuHahu1iNf4upO4vBDk4ENIPk8B3xWCi1wnYrErHCHtxyEbE8tiu8Uk8AZbnVRe9iz5pcONjofLPFXsTiDJ7yckeYSAb9kOxGU6a-a500FHjE3iO-x94ZIa_OL1w6uiCEjF7T4YA4-KEYH8H4-eXr0eXFcDAauqPhk4N_lzHIK-IS9-J8OBgMXHd46Y4cLHixFr_6FCq_iJ7-Aiso0mw)
+
+## Features
+
+- **Privacy-First**: All training happens on your devices, keeping sensitive data under your control
+- **Efficient**: Optimized for Apple Silicon using MLX, enabling fast training on consumer hardware
+- **Distributed**: Scale training across multiple Macs for better performance
+- **Flexible**: Support for various model architectures and training configurations
 
 ## Introduction to Distributed Training with MLX
 
@@ -72,8 +80,7 @@ This project serves as both a practical implementation and a research platform, 
 ### System Requirements
 
 - macOS Sonoma 14.0+ (Apple Silicon)
-- Python 3.12+
-- Xcode Command Line Tools
+- Python 3.11+
 - MLX 0.20.0+
 - High-speed network connection (10Gbps recommended)
 - SSH access configured between devices
@@ -220,4 +227,4 @@ For detailed information about our hardware configuration, training process, and
 
 ## License
 
-MIT License
+MIT License - See [LICENSE](LICENSE) for details.
