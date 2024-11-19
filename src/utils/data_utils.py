@@ -1,10 +1,11 @@
 import mlx.core as mx
 import numpy as np
-from typing import Iterator, Tuple, Dict, Optional
+from typing import Iterator, Tuple, Dict, Optional, List
 from pathlib import Path
 import logging
 import json
 from dataclasses import dataclass
+from src.data.dataset_config import DataConfig, BaseKnowledgeConfig
 
 @dataclass
 class DataConfig:
@@ -17,7 +18,6 @@ class StreamingDataset:
     """Memory efficient dataset that streams from disk"""
     def __init__(
         self,
-        data_path: str,
         config: DataConfig,
         world_size: int = 1,
         rank: int = 0
@@ -26,73 +26,62 @@ class StreamingDataset:
         self.world_size = world_size
         self.rank = rank
         
-        # Setup data source
-        self.data_path = Path(data_path)
-        if not self.data_path.exists():
-            raise FileNotFoundError(f"Data path not found: {data_path}")
-            
-        # Calculate shard info for distributed training
-        self.shard_size = self._get_shard_size()
-        self.shard_start = self.rank * self.shard_size
-        self.shard_end = self.shard_start + self.shard_size
+        # Initialize datasets
+        self.datasets = {}
+        self._initialize_datasets()
         
-        logging.info(
-            f"Rank {rank}/{world_size} processing shard "
-            f"[{self.shard_start}:{self.shard_end}]"
-        )
-    
-    def _get_shard_size(self) -> int:
-        """Calculate size of data shard for this worker"""
-        total_size = sum(1 for _ in open(self.data_path, 'r'))
-        return total_size // self.world_size
-    
+    def _initialize_datasets(self):
+        """Initialize all configured datasets"""
+        for dataset_name, weight in self.config.base_knowledge.datasets.items():
+            dataset_path = self.config.data_dir / dataset_name.replace("/", "_")
+            if not dataset_path.exists():
+                logging.warning(f"Dataset {dataset_name} not found at {dataset_path}")
+                continue
+                
+            self.datasets[dataset_name] = {
+                "path": dataset_path,
+                "weight": weight,
+                "file_size": dataset_path.stat().st_size
+            }
+            
+        if not self.datasets:
+            raise ValueError("No valid datasets found")
+            
     def __iter__(self) -> Iterator[Dict[str, mx.array]]:
         """Stream data in chunks to avoid loading everything into memory"""
-        chunk = []
-        chunk_size = 0
-        
-        # Read only this worker's shard
-        with open(self.data_path, 'r') as f:
-            # Skip to shard start
-            for _ in range(self.shard_start):
-                next(f)
-                
-            # Process shard
-            for line_num, line in enumerate(f):
-                if line_num >= self.shard_size:
-                    break
-                    
-                # Parse data
-                sample = json.loads(line)
-                chunk.append(sample)
-                chunk_size += 1
-                
-                # Yield batch when chunk is full
-                if chunk_size == self.config.streaming_chunk_size:
-                    yield from self._process_chunk(chunk)
-                    chunk = []
-                    chunk_size = 0
+        while True:
+            # Sample dataset based on weights
+            dataset_name = np.random.choice(
+                list(self.datasets.keys()),
+                p=[d["weight"] for d in self.datasets.values()]
+            )
+            dataset = self.datasets[dataset_name]
             
-            # Handle final partial chunk
-            if chunk:
-                yield from self._process_chunk(chunk)
-    
-    def _process_chunk(
-        self, 
-        chunk: list
-    ) -> Iterator[Dict[str, mx.array]]:
-        """Process a chunk of raw data into batches"""
-        # Convert chunk to arrays
-        input_ids = mx.array([s['input_ids'] for s in chunk])
-        labels = mx.array([s['labels'] for s in chunk])
+            # Stream chunks
+            with open(dataset["path"], 'r') as f:
+                chunk = []
+                for line in f:
+                    if len(chunk) >= self.config.streaming_chunk_size:
+                        yield self._process_chunk(chunk)
+                        chunk = []
+                    chunk.append(json.loads(line))
+                    
+                if chunk:  # Process remaining data
+                    yield self._process_chunk(chunk)
+                    
+    def _process_chunk(self, chunk: List[Dict]) -> Dict[str, mx.array]:
+        """Process a chunk of data into model inputs"""
+        # This would use proper tokenization in production
+        input_ids = mx.zeros((
+            self.config.batch_size,
+            self.config.sequence_length
+        ))
+        attention_mask = mx.ones_like(input_ids)
         
-        # Generate batches
-        for i in range(0, len(chunk), self.config.batch_size):
-            batch_slice = slice(i, i + self.config.batch_size)
-            yield {
-                'input_ids': input_ids[batch_slice],
-                'labels': labels[batch_slice]
-            }
+        return {
+            "input_ids": input_ids,
+            "attention_mask": attention_mask
+        }
 
 class PrefetchDataLoader:
     """Prefetch batches in background to optimize throughput"""

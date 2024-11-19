@@ -21,8 +21,8 @@ class DataConfig:
         "garage-bAInd/Open-Platypus": 0.10,  # Technical QA
         
         # Code and technical (25%)
-        "bigcode/starcoderdata": 0.15,         # Clean code
-        "codeparrot/github-code": 0.10,        # Additional code
+        "bigcode/starcoderdata": 0.15,        
+        "codeparrot/github-code": 0.10,       
         
         # Books and knowledge (45%)
         "EleutherAI/pile": 0.20,               # Filtered web content
